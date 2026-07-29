@@ -7,7 +7,8 @@ class Product extends Model {
             name: Sequelize.STRING,
             price: Sequelize.INTEGER,
             path: Sequelize.STRING,
-            offer: Sequelize.BOOLEAN,
+            offer: Sequelize.BOOLEAN,            
+            category_id: Sequelize.UUID,
             url:{
               type: Sequelize.VIRTUAL,
               get(){

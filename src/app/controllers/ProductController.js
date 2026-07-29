@@ -36,7 +36,7 @@ class ProductController {
         const schema = Yup.object({
             name: Yup.string(),
             price: Yup.number(),
-            category_id: Yup.number(),
+            category_id: Yup.string(),
             offer: Yup.boolean(),
         });
 

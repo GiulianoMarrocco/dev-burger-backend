@@ -3,15 +3,29 @@ import 'dotenv/config';
 import express from 'express';
 import routes from './routes.js';
 import fileRouteConfig from './config/fileRoutes.cjs';
+import cors from 'cors';
 
 
-const app = express();
+class App{
+    constructor(){
+        this.app = express();
 
-app.use(express.json());
-app.use(express.urlencoded({extended: true}));
-app.use('/product-file', fileRouteConfig);
-app.use('/category-file', fileRouteConfig);
+        this.app.use(cors());
+        this.middlewares();
+        this.routes();
+    }
 
-app.use(routes);
+    middlewares(){
+        this.app.use(cors());
+        this.app.use(express.json());
+        this.app.use(express.urlencoded({extended: true}));
+        this.app.use('/product-file', fileRouteConfig);
+        this.app.use('/category-file', fileRouteConfig);
+    }
 
-export default app;
+    routes(){
+        this.app.use(routes);
+    }
+}
+
+export default new App().app;

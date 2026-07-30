@@ -4,6 +4,10 @@ import express from 'express';
 import routes from './routes.js';
 import fileRouteConfig from './config/fileRoutes.cjs';
 import cors from 'cors';
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
+
+const swaggerDocument = YAML.load('./src/docs/swagger.yaml');
 
 
 class App{
@@ -24,6 +28,12 @@ class App{
     }
 
     routes(){
+        this.app.use(
+        '/api-docs',
+        swaggerUi.serve,
+        swaggerUi.setup(swaggerDocument)
+    );
+
         this.app.use(routes);
     }
 }

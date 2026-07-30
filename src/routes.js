@@ -12,17 +12,17 @@ import OrderController from './app/controllers/OrderController.js';
 const routes = new Router();
 const upload = multer(multerConfig);
 
+//Rotas publicas
 routes.post('/users', UserController.store);
 routes.post('/sessions', SessionController.store);
 
 routes.get('/products', ProductController.index);
 routes.get('/categories', CategoryController.index);
 
+//Rotas privadas
 routes.use(authMiddleware);
 routes.post('/products', adminMiddleware, upload.single('file'), ProductController.store);
 routes.put('/products/:id', adminMiddleware, upload.single('file'), ProductController.update);
-
-
 
 routes.post('/categories', adminMiddleware, upload.single('file'), CategoryController.store);
 routes.put('/categories/:id', adminMiddleware, upload.single('file'), CategoryController.update);

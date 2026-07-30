@@ -1,0 +1,1475 @@
+info:
+  title: 🍔 DevBurger API
+  version: 1.0.0
+
+  description: |
+    ## Bem-vindo à DevBurger API
+
+    API REST desenvolvida para gerenciamento de restaurantes.
+
+    Esta API permite:
+
+    - 👤 Cadastro de usuários
+    - 🔐 Autenticação utilizando JWT
+    - 🛡️ Controle de acesso por Administrador
+    - 🍔 Cadastro e gerenciamento de produtos
+    - 📂 Cadastro de categorias
+    - 📷 Upload de imagens
+    - 📦 Gerenciamento completo de pedidos
+
+    ### Tecnologias
+
+    - Node.js
+    - Express
+    - Sequelize
+    - PostgreSQL
+    - MongoDB
+    - JWT
+    - Multer
+    - Swagger OpenAPI 3
+
+    ---
+    Desenvolvido por **Giuliano Marrocco**.
+
+  contact:
+    name: Giuliano Marrocco
+    url: https://www.linkedin.com/in/giulianomarrocco
+    email: seuemail@email.com
+
+  license:
+    name: MIT
+
+servers:
+
+  - url: http://localhost:3001
+    description: 💻 Ambiente Local
+
+  - url: https://api.devburger.com
+    description: 🚀 Produção (Exemplo)
+
+tags:
+
+  - name: Users
+    description: Operações relacionadas aos usuários do sistema.
+
+  - name: Sessions
+    description: Autenticação utilizando JWT.
+
+  - name: Products
+    description: Gerenciamento completo do cardápio.
+
+  - name: Categories
+    description: Organização das categorias dos produtos.
+
+  - name: Orders
+    description: Gerenciamento completo dos pedidos.
+
+components:
+
+  securitySchemes:
+
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Informe apenas o Token JWT.
+
+        Exemplo:
+
+        Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+  schemas:
+
+    Error:
+
+      type: object
+
+      properties:
+
+        error:
+          oneOf:
+
+            - type: string
+              example: Email already exists
+
+            - type: array
+              items:
+                type: string
+              example:
+                - Name is required
+                - Email is required
+
+    User:
+
+      type: object
+
+      properties:
+
+        id:
+          type: string
+          format: uuid
+          example: 4a0ef77d-f5ef-49d4-a4d8-a221fa634d85
+
+        name:
+          type: string
+          example: João Silva
+
+        email:
+          type: string
+          format: email
+          example: joao@email.com
+
+        admin:
+          type: boolean
+          example: true
+
+    UserCreate:
+
+      type: object
+
+      required:
+        - name
+        - email
+        - password
+        - admin
+
+      properties:
+
+        name:
+          type: string
+          example: João Silva
+
+        email:
+          type: string
+          format: email
+          example: joao@email.com
+
+        password:
+          type: string
+          format: password
+          example: "123456"
+
+        admin:
+          type: boolean
+          example: false
+
+    Login:
+
+      type: object
+
+      required:
+        - email
+        - password
+
+      properties:
+
+        email:
+          type: string
+          format: email
+          example: admin@devburger.com
+
+        password:
+          type: string
+          format: password
+          example: "123456"
+
+    AuthResponse:
+
+      type: object
+
+      properties:
+
+        id:
+          type: string
+          format: uuid
+
+        name:
+          type: string
+
+        email:
+          type: string
+
+        admin:
+          type: boolean
+
+        token:
+          type: string
+          description: Token JWT utilizado para acessar as rotas protegidas.
+              
+        Category:
+      type: object
+
+      properties:
+
+        id:
+          type: integer
+          example: 1
+
+        name:
+          type: string
+          example: Hambúrgueres
+
+        path:
+          type: string
+          example: 4b5fbe9f-hamburguer.png
+
+        url:
+          type: string
+          example: http://localhost:3001/category-file/4b5fbe9f-hamburguer.png
+
+    CategoryCreate:
+
+      type: object
+
+      required:
+        - name
+        - file
+
+      properties:
+
+        name:
+          type: string
+          example: Hambúrgueres
+
+        file:
+          type: string
+          format: binary
+          description: Imagem da categoria.
+
+    Product:
+
+      type: object
+
+      properties:
+
+        id:
+          type: integer
+          example: 1
+
+        name:
+          type: string
+          example: X-Burger Bacon
+
+        price:
+          type: integer
+          example: 35
+
+        offer:
+          type: boolean
+          example: false
+
+        category_id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+
+        path:
+          type: string
+          example: e8d7af61-burger.png
+
+        url:
+          type: string
+          example: http://localhost:3001/product-file/e8d7af61-burger.png
+
+        category:
+          $ref: '#/components/schemas/Category'
+
+    ProductCreate:
+
+      type: object
+
+      required:
+        - name
+        - price
+        - category_id
+        - file
+
+      properties:
+
+        name:
+          type: string
+          example: X-Burger Bacon
+
+        price:
+          type: number
+          example: 35
+
+        category_id:
+          type: string
+          format: uuid
+
+        offer:
+          type: boolean
+          example: false
+
+        file:
+          type: string
+          format: binary
+          description: Imagem do produto.
+
+    OrderProduct:
+
+      type: object
+
+      required:
+        - id
+        - quantity
+
+      properties:
+
+        id:
+          type: integer
+          example: 1
+
+        quantity:
+          type: integer
+          example: 2
+
+    Order:
+
+      type: object
+
+      properties:
+
+        user:
+
+          type: object
+
+          properties:
+
+            id:
+              type: string
+              format: uuid
+
+            name:
+              type: string
+              example: João Silva
+
+        products:
+
+          type: array
+
+          items:
+
+            type: object
+
+            properties:
+
+              id:
+                type: integer
+                example: 1
+
+              name:
+                type: string
+                example: X-Burger Bacon
+
+              price:
+                type: integer
+                example: 35
+
+              quantity:
+                type: integer
+                example: 2
+
+              category:
+                type: string
+                example: Hambúrgueres
+
+              url:
+                type: string
+
+        status:
+          type: string
+          example: Pedido realizado
+
+paths:
+
+  /users:
+
+    post:
+
+      tags:
+        - Users
+
+      summary: Cadastrar usuário
+
+      description: |
+        Cria um novo usuário no sistema.
+
+      requestBody:
+
+        required: true
+
+        content:
+
+          application/json:
+
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+
+      responses:
+
+        "201":
+
+          description: Usuário criado com sucesso.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/User'
+
+        "400":
+
+          description: Dados inválidos ou e-mail já cadastrado.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /sessions:
+
+    post:
+
+      tags:
+        - Sessions
+
+      summary: Realizar login
+
+      description: |
+        Autentica um usuário e retorna um Token JWT.
+
+      requestBody:
+
+        required: true
+
+        content:
+
+          application/json:
+
+            schema:
+              $ref: '#/components/schemas/Login'
+
+      responses:
+
+        "200":
+
+          description: Login realizado com sucesso.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+        "400":
+
+          description: Email ou senha inválidos.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+  /products:
+
+    get:
+
+      tags:
+        - Products
+
+      summary: Listar produtos
+
+      description: |
+        Retorna todos os produtos cadastrados juntamente com sua categoria.
+
+      responses:
+
+        "200":
+
+          description: Lista de produtos retornada com sucesso.
+
+          content:
+
+            application/json:
+
+              schema:
+
+                type: object
+
+                properties:
+
+                  products:
+
+                    type: array
+
+                    items:
+                      $ref: '#/components/schemas/Product'
+
+        "500":
+
+          description: Erro interno do servidor.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+
+      tags:
+        - Products
+
+      summary: Cadastrar produto
+
+      description: |
+        Cria um novo produto.
+
+        Esta rota é exclusiva para administradores.
+
+      security:
+        - bearerAuth: []
+
+      requestBody:
+
+        required: true
+
+        content:
+
+          multipart/form-data:
+
+            schema:
+              $ref: '#/components/schemas/ProductCreate'
+
+      responses:
+
+        "201":
+
+          description: Produto criado com sucesso.
+
+          content:
+
+            application/json:
+
+              schema:
+
+                type: object
+
+                properties:
+
+                  newProduct:
+                    $ref: '#/components/schemas/Product'
+
+        "400":
+
+          description: Dados inválidos.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        "401":
+
+          description: Token JWT não informado ou inválido.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        "403":
+
+          description: Usuário sem permissão de administrador.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        "500":
+
+          description: Erro interno do servidor.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+    /products/{id}:
+
+    put:
+
+      tags:
+        - Products
+
+      summary: Atualizar produto
+
+      description: |
+        Atualiza as informações de um produto existente.
+
+        Todos os campos são opcionais.
+
+        Caso uma nova imagem seja enviada, ela substituirá a imagem anterior.
+
+        Esta rota é exclusiva para administradores.
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+
+        - in: path
+
+          name: id
+
+          required: true
+
+          description: ID do produto.
+
+          schema:
+            type: integer
+            example: 1
+
+      requestBody:
+
+        required: true
+
+        content:
+
+          multipart/form-data:
+
+            schema:
+
+              type: object
+
+              properties:
+
+                name:
+                  type: string
+                  example: X-Burger Bacon Especial
+
+                price:
+                  type: number
+                  example: 39.90
+
+                category_id:
+                  type: string
+                  format: uuid
+                  example: 550e8400-e29b-41d4-a716-446655440000
+
+                offer:
+                  type: boolean
+                  example: true
+
+                file:
+                  type: string
+                  format: binary
+                  description: Nova imagem do produto.
+
+      responses:
+
+        "200":
+
+          description: Produto atualizado com sucesso.
+
+          content:
+
+            application/json:
+
+              schema:
+
+                type: object
+
+                properties:
+
+                  updatedProduct:
+
+                    type: array
+
+                    example:
+                      - 1
+
+        "400":
+
+          description: Dados inválidos.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        "401":
+
+          description: Token JWT inválido ou não informado.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        "403":
+
+          description: Usuário sem permissão para realizar esta operação.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        "404":
+
+          description: Produto não encontrado.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        "500":
+
+          description: Erro interno do servidor.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+  /categories:
+
+    get:
+
+      tags:
+        - Categories
+
+      summary: Listar categorias
+
+      description: |
+        Retorna todas as categorias cadastradas no sistema.
+
+      responses:
+
+        "200":
+
+          description: Lista de categorias retornada com sucesso.
+
+          content:
+
+            application/json:
+
+              schema:
+
+                type: object
+
+                properties:
+
+                  categories:
+
+                    type: array
+
+                    items:
+                      $ref: '#/components/schemas/Category'
+
+        "500":
+
+          description: Erro interno do servidor.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+
+      tags:
+        - Categories
+
+      summary: Cadastrar categoria
+
+      description: |
+        Cria uma nova categoria.
+
+        É obrigatório enviar uma imagem.
+
+        Esta rota é exclusiva para administradores.
+
+      security:
+        - bearerAuth: []
+
+      requestBody:
+
+        required: true
+
+        content:
+
+          multipart/form-data:
+
+            schema:
+              $ref: '#/components/schemas/CategoryCreate'
+
+      responses:
+
+        "201":
+
+          description: Categoria criada com sucesso.
+
+          content:
+
+            application/json:
+
+              schema:
+
+                type: object
+
+                properties:
+
+                  newCategory:
+                    $ref: '#/components/schemas/Category'
+
+        "400":
+
+          description: Dados inválidos ou categoria já cadastrada.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        "401":
+
+          description: Token JWT inválido ou não informado.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        "403":
+
+          description: Usuário sem permissão para realizar esta operação.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        "500":
+
+          description: Erro interno do servidor.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+    /categories/{id}:
+
+    put:
+
+      tags:
+        - Categories
+
+      summary: Atualizar categoria
+
+      description: |
+        Atualiza os dados de uma categoria existente.
+
+        O envio de uma nova imagem é opcional.
+
+        Caso uma imagem seja enviada, ela substituirá a imagem atual.
+
+        Esta rota é exclusiva para administradores.
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+
+        - in: path
+
+          name: id
+
+          required: true
+
+          description: ID da categoria.
+
+          schema:
+            type: integer
+            example: 1
+
+      requestBody:
+
+        required: true
+
+        content:
+
+          multipart/form-data:
+
+            schema:
+
+              type: object
+
+              properties:
+
+                name:
+                  type: string
+                  example: Hambúrgueres Artesanais
+
+                file:
+                  type: string
+                  format: binary
+                  description: Nova imagem da categoria.
+
+      responses:
+
+        "200":
+
+          description: Categoria atualizada com sucesso.
+
+        "400":
+
+          description: Dados inválidos ou categoria já existente.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        "401":
+
+          description: Token JWT inválido ou não informado.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        "403":
+
+          description: Usuário sem permissão para realizar esta operação.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        "404":
+
+          description: Categoria não encontrada.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        "500":
+
+          description: Erro interno do servidor.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+    /orders:
+
+    get:
+
+      tags:
+        - Orders
+
+      summary: Listar pedidos
+
+      description: |
+        Retorna todos os pedidos cadastrados no sistema.
+
+        Cada pedido contém os dados do cliente,
+        os produtos adquiridos e o status atual.
+
+      security:
+        - bearerAuth: []
+
+      responses:
+
+        "200":
+
+          description: Lista de pedidos retornada com sucesso.
+
+          content:
+
+            application/json:
+
+              schema:
+
+                type: array
+
+                items:
+                  $ref: '#/components/schemas/Order'
+
+        "401":
+
+          description: Token JWT inválido ou não informado.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        "500":
+
+          description: Erro interno do servidor.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+
+      tags:
+        - Orders
+
+      summary: Criar pedido
+
+      description: |
+        Cria um novo pedido utilizando os produtos enviados na requisição.
+
+        O usuário autenticado será automaticamente associado ao pedido.
+
+      security:
+        - bearerAuth: []
+
+      requestBody:
+
+        required: true
+
+        content:
+
+          application/json:
+
+            schema:
+
+              type: object
+
+              required:
+                - products
+
+              properties:
+
+                products:
+
+                  type: array
+
+                  items:
+
+                    $ref: '#/components/schemas/OrderProduct'
+
+      responses:
+
+        "201":
+
+          description: Pedido criado com sucesso.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Order'
+
+        "400":
+
+          description: Dados inválidos.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        "401":
+
+          description: Token JWT inválido ou não informado.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        "500":
+
+          description: Erro interno do servidor.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+    /orders/{id}:
+
+    put:
+
+      tags:
+        - Orders
+
+      summary: Atualizar status do pedido
+
+      description: |
+        Atualiza o status de um pedido existente.
+
+        Esta rota é exclusiva para administradores.
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+
+        - in: path
+
+          name: id
+
+          required: true
+
+          description: ID do pedido (MongoDB).
+
+          schema:
+            type: string
+            example: 6855a8b9c9d1b1f12c7c9d55
+
+      requestBody:
+
+        required: true
+
+        content:
+
+          application/json:
+
+            schema:
+
+              type: object
+
+              required:
+                - status
+
+              properties:
+
+                status:
+
+                  type: string
+
+                  description: Novo status do pedido.
+
+                  example: Pedido em preparação
+
+                  enum:
+                    - Pedido realizado
+                    - Pedido recebido
+                    - Pedido em preparação
+                    - Saiu para entrega
+                    - Pedido entregue
+                    - Pedido cancelado
+
+      responses:
+
+        "200":
+
+          description: Status atualizado com sucesso.
+
+          content:
+
+            application/json:
+
+              schema:
+
+                type: object
+
+                properties:
+
+                  message:
+
+                    type: string
+
+                    example: Status updated
+
+        "400":
+
+          description: Dados inválidos.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        "401":
+
+          description: Token JWT inválido ou não informado.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        "403":
+
+          description: Usuário sem permissão para realizar esta operação.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        "404":
+
+          description: Pedido não encontrado.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        "500":
+
+          description: Erro interno do servidor.
+
+          content:
+
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/Error'
+                examples:
+
+    UserExample:
+
+      summary: Usuário administrador
+
+      value:
+
+        id: 4a0ef77d-f5ef-49d4-a4d8-a221fa634d85
+        name: Giuliano Marrocco
+        email: giuliano@email.com
+        admin: true
+
+    LoginExample:
+
+      summary: Login
+
+      value:
+
+        email: admin@devburger.com
+        password: "123456"
+
+    ProductExample:
+
+      summary: Produto
+
+      value:
+
+        id: 1
+        name: X-Burger Bacon
+        price: 35
+        offer: false
+        path: 8ad9fe2f-burger.png
+        url: http://localhost:3001/product-file/8ad9fe2f-burger.png
+
+        category:
+
+          id: 2
+          name: Hambúrgueres
+
+    CategoryExample:
+
+      summary: Categoria
+
+      value:
+
+        id: 2
+        name: Hambúrgueres
+        path: hamburguer.png
+        url: http://localhost:3001/category-file/hamburguer.png
+
+    OrderExample:
+
+      summary: Pedido
+
+      value:
+
+        user:
+
+          id: 4a0ef77d-f5ef-49d4-a4d8-a221fa634d85
+          name: João Silva
+
+        products:
+
+          - id: 1
+            name: X-Burger Bacon
+            price: 35
+            quantity: 2
+            category: Hambúrgueres
+            url: http://localhost:3001/product-file/8ad9fe2f-burger.png
+
+        status: Pedido realizado
+
+x-tagGroups:
+
+  - name: Autenticação
+
+    tags:
+      - Sessions
+
+  - name: Usuários
+
+    tags:
+      - Users
+
+  - name: Cardápio
+
+    tags:
+      - Categories
+      - Products
+
+  - name: Pedidos
+
+    tags:
+      - Orders
+
+externalDocs:
+
+  description: Repositório do Projeto DevBurger
+
+  url: https://github.com/GiulianoMarrocco
+
+  x-logo:
+  url: https://raw.githubusercontent.com/swagger-api/swagger.io/wordpress/images/assets/SW-logo-clr.png
+  altText: DevBurger API
+
+x-api-info:
+  project: DevBurger API
+  version: 1.0.0
+  language: pt-BR
+
+x-notes:
+  authentication: |
+    Todas as rotas protegidas exigem um JWT válido enviado no header:
+
+      Authorization: Bearer <token>
+
+    O token é obtido através da rota:
+
+      POST /sessions
+
+  uploads: |
+    Para upload de imagens utilize:
+
+      Content-Type: multipart/form-data
+
+    Campo esperado:
+
+      file
+
+  permissions: |
+    Algumas rotas exigem que o usuário seja administrador.
+
+    Caso contrário a API retornará:
+
+      HTTP 403 Forbidden
+
+  responses: |
+    Códigos HTTP utilizados:
+
+      200 - Sucesso
+
+      201 - Recurso criado
+
+      400 - Dados inválidos
+
+      401 - Não autenticado
+
+      403 - Sem permissão
+
+      404 - Recurso não encontrado
+
+      500 - Erro interno do servidor
+
+x-changelog:
+
+  - version: 1.0.0
+
+    date: 2026-07-29
+
+    changes:
+
+      - Cadastro de usuários
+
+      - Autenticação JWT
+
+      - Cadastro de categorias
+
+      - Cadastro de produtos
+
+      - Upload de imagens
+
+      - Gerenciamento de pedidos
+
+      - Atualização de status
+
+    author: Giuliano Marrocco
